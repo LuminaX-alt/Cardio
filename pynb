@@ -1,0 +1,678 @@
+#Importing data manipulation libraries.
+import pandas as pd
+import numpy as np
+
+#The warnings module handles warnings in Python. 
+#It would be helpful in throwing away warnings caused.
+import warnings
+warnings.filterwarnings('ignore')
+
+#Importing data visualization libraries.
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+#Mounting the Google Drive to access the data.
+from google.colab import drive
+drive.mount('/content/drive')
+#The variable 'path' contains the path of dataset stored in drive.
+#Importing Cardiovascular risk Data File.
+path ='/content/drive/MyDrive/CARDIOVASCULAR RISK PREDICTION/'
+df = pd.read_csv(path + 'data_cardiovascular_risk.csv',index_col='id')
+
+#Showing the dataframe.
+df
+#Checking the first 5 rows.
+df.head()
+#Checking the last 5 rows.
+df.tail()
+#Checking the shape of the data.
+df.shape
+#Checking for the title of all the columns.
+df.columns
+#Updated Dataset after renaming all the columns.
+df.head(2)
+#Checking for null entries and data type of each column.
+df.info()
+#Statistical description of all the columns present in the dataset.
+df.describe(include='all').T
+#Renaming the columns for a better view and understanding.
+df.rename(columns={'sex':'Gender','is_smoking':'smoking','cigsPerDay':'cigarettes/day','BPMeds':'BP_meds',
+                   'prevalentStroke':'stroke','prevalentHyp':'hypertensive',
+                   'totChol':'total_cholesterol','sysBP':'systolic_bp','diaBP':'diastolic_bp',
+                   'BMI':'bmi','heartRate':'heart_rate','TenYearCHD':'10yearCHD'},
+          inplace = True)
+#Checking the updated names of the columns.
+df.columns
+#Checking for the duplicated entries in the dataset.
+MissV = len(df[df.duplicated()])
+print("There are",MissV, "duplicate values.")
+#Sum of all the null values present in each column.
+for i in df.columns.tolist():
+  print("Total missing values in",i,":",df[i].isna().sum())
+  #Sum of the null values overall.
+print("Overall missing values are",df.isna().sum().sum())
+#Calculating the percentage of NULL values in each column.
+totalN = df.isna().sum().sort_values(ascending=False)
+percentage = (df.isna().sum()/df.isna().count()).sort_values(ascending=False) * 100
+missing_v = pd.concat([totalN, percentage], axis=1, keys=['Total', 'Percentage'])
+missing_v
+#importing missingno for visualizing the null values.
+import missingno as misno
+
+# Visualizing the number of missing values as a bar chart
+misno.bar(df,color=(1, 0.5, 0.5),figsize=(10,5), fontsize=12)
+#Encoding the 'Gender' feature into binary column.
+df['Gender'] = np.where(df['Gender'] == 'M',1,0)
+#Encoding the 'smoking' feature into binary column.
+df['smoking'] = np.where(df['smoking'] == 'YES',1,0)
+#Check Unique Values for each variable.
+for i in df.columns.tolist():
+  print(i,":",df[i].nunique())
+  #Extracting categorical features.
+
+cat_features = ['education','Gender','smoking','BP_meds','stroke','hypertensive','diabetes']
+print(f'There are {len(cat_features)} Categorical Features.')
+#All the Categorical features.
+cat_features
+#head of the Categorical columns.
+df[cat_features].head()
+#Extracting numerical features.
+
+num_features = ['age','cigarettes/day','total_cholesterol','systolic_bp','diastolic_bp','bmi','heart_rate','glucose']
+print(f'There are {len(num_features)} Numerical Features.')
+#All the numerical features.
+num_features
+#first five rows of numerical columns.
+df[num_features].head()
+#Checking the null count before removal of the null values.
+df[['cigarettes/day','BP_meds','total_cholesterol','bmi','heart_rate','glucose']].isna().sum()
+#Dropping the null values from the data.
+df.dropna(subset=['cigarettes/day','BP_meds','total_cholesterol','bmi','heart_rate','glucose'],inplace= True)
+#Checking the null count after removal of the null values.
+df[['cigarettes/day','BP_meds','total_cholesterol','bmi','heart_rate','glucose']].isna().sum()
+# #Dropping Education from the dataset.
+df.drop(['education'], axis=1, inplace=True)
+#Checking the count of null values in each column after treatment.
+df.isna().sum()
+# Checking the total people who have a risk of CHD(Coronary Heart Disease).
+df["10yearCHD"].value_counts()
+# Checking the total people who have a risk of CHD(Coronary Heart Disease).
+df["10yearCHD"].value_counts()
+# plotting number of patients at risk of CHD vs those whose results are normal.
+g = sns.countplot(df['10yearCHD'],palette = "Set2")
+g.set_xticklabels(['No Risk','Risk'])
+g.set_title('Risk of Cardiovascular Disease')
+plt.show()
+# Counting the number of males and females.
+df["Gender"].value_counts()
+# Plotting the bar graph with number of males and females.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['Gender'], ax=ax, palette='pastel')
+sns.countplot(df['Gender'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('Gender')
+plt.title('Count plot of Gender with Target Variable')
+# Counting the number of smokers and non-smokers.(Yes = 1,No = 0)
+df["smoking"].value_counts()
+# Plotting number of people smoking vs not smoking.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['smoking'], ax=ax, palette='pastel')
+sns.countplot(df['smoking'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('Smoking')
+plt.title('Count plot of Smoking with Target Variable')
+# Number of males who smokes cigarette.
+male_smokers = df.loc[(df['smoking']==1) & (df['Gender']==1)]
+#Checking for the males who are smokers.
+ms= male_smokers.shape[0]
+print(f'There are total of {ms} male smokers who at least smoke one cigarette a day.')
+# Number of females who smokes cigarette.
+female_smokers = df.loc[(df['smoking']==1) & (df['Gender']==0)]
+#Checking for females who are smokers.
+fs = female_smokers.shape[0]
+print(f'There are total of {fs} female smokers who at least smoke one cigarette a day.')
+#Checking the value count of patients who have and have not experienced stroke in the past.
+df["BP_meds"].value_counts()
+#Plotting the count plot for patients who take BP meds vs patients who do not take BP meds with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['BP_meds'], ax=ax, palette='pastel')
+sns.countplot(df['BP_meds'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('BP_meds')
+plt.title('Count plot of BP_meds with Target Variable')
+#Checking the value count of patients who have and have not experienced stroke in the past.
+df["stroke"].value_counts()
+#Plotting the count plot for patients who have experienced stroke vs patients who did not with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['stroke'], ax=ax, palette='pastel')
+sns.countplot(df['stroke'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('Stroke')
+plt.title('Count plot of Stroke with Target Variable')
+#Checking for the value count of the hypertensive and non-hypertensive patients.
+df["hypertensive"].value_counts()
+#Plotting the count plot for hypertensive  vs non-hypertensive with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['hypertensive'], ax=ax, palette='pastel')
+sns.countplot(df['hypertensive'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('hypertensive')
+plt.title('Count plot of hypertensive with Target Variable')
+#Checking the value count of diabetic and non-diabetic patients.
+df["diabetes"].value_counts()
+#Plotting the count plot for diabetic vs non-diabetic patients with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['diabetes'], ax=ax, palette='pastel')
+sns.countplot(df['diabetes'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('diabetes')
+plt.title('Count plot of diabetes with Target Variable')
+# Making distribution plot for Numerical features for checking the skewness.
+
+n=1
+plt.figure(figsize=(14,30))
+for i in num_features:
+  plt.subplot(12,4,n)
+  n= n+1
+  sns.distplot(df[i],color='teal')
+  plt.title(i)
+  plt.tight_layout()
+  # plotting boxplot for each numerical feature to check for the outliers.
+
+plt.figure(figsize=(20,40), facecolor='white')
+plotnumber = 1
+for numerical_feature in num_features:
+    ax = plt.subplot(12,4,plotnumber)
+    sns.boxplot(df[numerical_feature], color='#DEB800')
+    plt.xlabel(numerical_feature)
+    plotnumber += 1
+plt.show()
+# Removing values of Cigarette per day greater than 50.
+df = df[df["cigarettes/day"] <= 50]
+# Removing values of DiaBp greater than 140.
+df = df[df['diastolic_bp'] <= 140]
+# Removing values of SysBP greater than 250.
+df = df[df['systolic_bp'] <= 250]
+# Removing values of BMI greater than 50.
+df = df[df['bmi'] <= 50]
+# Removing values of heart rate greater than 130.
+df = df[df["heart_rate"] <= 130]
+# Removing values of glucose greater than 300.
+df = df[df["glucose"] <= 300]
+# Removing values of total cholesterol greater than 500.
+df = df[df["total_cholesterol"] <= 500]
+# plotting boxplot for each numerical feature to check for the outliers.
+
+plt.figure(figsize=(20,40), facecolor='white')
+plotnumber = 1
+for numerical_feature in num_features:
+    ax = plt.subplot(12,4,plotnumber)
+    sns.boxplot(df[numerical_feature], color='#DEB800')
+    plt.xlabel(numerical_feature)
+    plotnumber += 1
+plt.show()
+#Information after removing the borderline outliers.
+df.info()#Plotting count plot of age with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['age'], ax=ax, palette='pastel')
+sns.countplot(df['age'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('Age')
+plt.title('Count plot of Age with Target Variable')
+#plotting the boxplot between sex variable and BMI variable with target class
+plt.figure(figsize=(12,8))
+sns.violinplot(data=df,x="Gender", y='bmi',hue="10yearCHD",palette = 'magma')
+plt.title("Distributions of BMI Vs Gender with Target class",fontsize=15)
+#Plotting count plot of 'cigarettes/day' with target variable.
+fig, ax = plt.subplots(figsize=(10,5))
+sns.countplot(df['cigarettes/day'], ax=ax, palette='pastel')
+sns.countplot(df['cigarettes/day'], hue=df['10yearCHD'],ax=ax, palette='bright')
+plt.xlabel('cigarettes/day')
+plt.title('Count plot of Age with Target Variable')
+#plotting the boxplot between sex variable and totChol variable with target class
+plt.figure(figsize=(12,8))
+sns.violinplot(data=df,x="Gender", y='total_cholesterol',hue="10yearCHD",palette = 'crest_r')
+plt.title("Distributions of Gender Vs Total Cholesterol with Target class",fontsize=15)
+#plotting the boxplot between Gender variable and heart_rate variable with target class.
+plt.figure(figsize=(12,8))
+sns.violinplot(data=df,x="Gender", y='heart_rate',hue="10yearCHD",palette = 'OrRd')
+plt.title("Distributions of Gender Vs heart_rate with Target class",fontsize=15)
+#ploting the boxplot between sex variable and glucose variable with target class
+plt.figure(figsize=(12,8))
+sns.violinplot(data=df,x="Gender", y='glucose',hue="10yearCHD",palette = 'BuPu_r')
+plt.title("Distributions of Gender Vs glucose with Target class",fontsize=15)
+# Checking Linearity using Bivariate analysis.
+# list of independent variables.
+independent_variables = [i for i in df.columns if i not in ['10yearCHD']]
+
+# defining figure.
+plt.figure(figsize=(18,18))
+
+# making subplots for all independent variables vs TenYearCHD(dependent variable).
+for n, column in enumerate(df.columns ):
+  plt.subplot(5, 4, n+1)
+  sns.regplot(x = df[column], y =df['10yearCHD'],line_kws={"color": "green"})
+  plt.title(f'{column.title()} v/s 10yearCHD',weight='bold')
+  plt.tight_layout()
+  # Defining a Seaborn correlation map(Heatmap).
+correlmap = df.corr()
+
+# display the heatmap.
+f, ax = plt.subplots(figsize=(14, 14))
+sns.heatmap(correlmap,cmap= 'Greens', linewidths=.5,annot=True, ax = ax,cbar=False)
+# Calculating MAP using 'SysBP' and 'DiaBP'.
+df["mean_art_pressure"] = (df["systolic_bp"] + 2 * df["diastolic_bp"])/3
+# Dropping the SysBP and DiaBp attributes, since they're both included in MAP.
+df.drop(columns = ["systolic_bp", "diastolic_bp"], inplace = True)
+#Dropping the smoking.
+df.drop(columns = ["smoking"], inplace = True)
+# Defining a Seaborn correlation map(Heatmap).
+correlmap = df.corr()
+
+# display the heatmap.
+f, ax = plt.subplots(figsize=(14, 14))
+sns.heatmap(correlmap,cmap= 'Greens', linewidths=.5,annot=True, ax = ax,cbar=False)
+#Creating dummy variables from categorical features.
+dataset = pd.get_dummies(df,columns = ['Gender','BP_meds','stroke','hypertensive','diabetes'])
+# Checking the dataset after all the adjustments and transformations.
+dataset
+#Checking the shape of the dataset after all the transformations.
+
+dataset.shape
+# Plotting the pie chart to check the balance in the dataset.
+
+plt.figure(figsize=(7,5), dpi=100)
+proportion = df['10yearCHD'].value_counts()
+labels = ['SAFE','AT RISK']
+plt.title('Proportion of Safe and at Risk for Target Feature')
+plt.pie(proportion, explode=(0,0.2),labels=labels, shadow = True, autopct = '%1.1f%%', colors= ['#ff9999','#66b3ff'])
+plt.legend()
+plt.show()
+# Checking the count of the classes in the target variable.
+
+df['10yearCHD'].groupby(df['10yearCHD']).count()
+#Applying normalization operation for numeric stability
+from sklearn.preprocessing import StandardScaler
+standardizer = StandardScaler()
+# X = standardizer.fit_transform(X_resampled)
+columns_to_scale =  ['age','cigarettes/day','total_cholesterol','mean_art_pressure','bmi','heart_rate','glucose']
+dataset[columns_to_scale] = standardizer.fit_transform(dataset[columns_to_scale])
+ #Splitting the data into set of independent variables and a dependent variable.
+X = dataset.drop('10yearCHD',axis=1).values
+y = dataset['10yearCHD'].values
+#Train test split
+from sklearn.model_selection import train_test_split
+# Dividing the data in training and test dataset.
+X_train, X_test, y_train, y_test = train_test_split(X, y , test_size=0.25, random_state=0,stratify=y)
+# checking the shape of our train and test data.
+print(X_train.shape)
+print(X_test.shape)
+#Using SMOTE for oversampling
+from imblearn.over_sampling import SMOTE
+# Creating the instance
+smote = SMOTE(random_state = 42)
+# fit predictor and target variable
+X_train_sm, y_train_sm = smote.fit_resample(X, y)
+# checking the length of our train set before and after handeling imbalance.
+
+print('Original dataset shape', len(X_train))
+print('Resampled dataset shape', len(X_train_sm))
+# Plotting the count plot to check the balance after handling imbalance.
+sns.countplot(y_train_sm)
+# Dataframe to contain Model performance analysis reports.
+res_df=pd.DataFrame()
+#Importing Important libraries
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import plot_roc_curve
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#Importing Logistic Regression from sklearn
+from sklearn.linear_model import LogisticRegression
+# Creating model object for logistic regression.
+
+clf = LogisticRegression(fit_intercept=True, max_iter=10000)
+# fit the model.
+
+clf.fit(X_train_sm,y_train_sm)
+# Getting the predicted classes for training and testing set
+
+train_class_preds = clf.predict(X_train_sm)
+test_class_preds = clf.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy = accuracy_score(train_class_preds, y_train_sm)
+test_accuracy = accuracy_score(test_class_preds, y_test)
+
+# Display accuracies.
+
+print("The accuracy on train data is ", train_accuracy)
+print("The accuracy on test data is ", test_accuracy)
+# Confusion Matrix for logistic regression classifier.
+
+cf_matrix = confusion_matrix(y_test,test_class_preds)
+cf_matrix
+#Plotting the cofusion matrix.
+labels = ['414','220','32','80']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(cf_matrix, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for Logistic Regression');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+# Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True'])
+ax.yaxis.set_ticklabels(['False','True'])
+
+# Display the visualization of the Confusion Matrix.
+plt.show()
+# Predicted values.
+y_pred_log_reg = clf.predict(X_test)
+# Getting classification report.
+
+dict_1 = classification_report(y_test, y_pred_log_reg, output_dict = True)
+#Adding results to model evaluation dataframe.
+tempodf=pd.DataFrame(dict_1).transpose()
+tempodf['Model'] = 'Logistic Regression Classifier'
+res_df=res_df.append(tempodf[2:-2])
+res_df
+#Importing libraries for DecisionTreeClassifier model.
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+# Creating model object for DecisionTreeClassifier.
+dt_clf = DecisionTreeClassifier()
+# Storing the hyperparameters in Dict
+parameters = {'max_depth' : [4,6,8,10],
+              'min_samples_split' : [10,20,30,40,50],
+              'min_samples_leaf' : [10,15,20]}
+hyperparameter tuning.
+dt_clf = GridSearchCV(dt_clf, parameters, scoring='roc_auc', cv=5)
+# Fitting the model
+dt_clf.fit(X_train_sm,y_train_sm)
+# Checking the best parameters
+dt_clf.best_estimator_
+# Getting the predicted classes for training and testing set
+
+train_dt_prediction = dt_clf.predict(X_train_sm)
+test_dt_prediction = dt_clf.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy_dt = accuracy_score(train_dt_prediction, y_train_sm)
+test_accuracy_dt = accuracy_score(test_dt_prediction, y_test)
+
+# Display accuracies.
+print("The accuracy on train data is ", train_accuracy_dt)
+print("The accuracy on test data is ", test_accuracy_dt)
+# Confusion Matrix for random forest classifier.
+
+dt_cf_matrix = confusion_matrix(y_test,test_dt_prediction)
+dt_cf_matrix
+# Plotting the confusion matrix
+
+labels = ['490','144','26','86']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(dt_cf_matrix, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for Decision Tree');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+## Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True'])
+ax.yaxis.set_ticklabels(['False','True'])
+
+## Display the visualization of the Confusion Matrix.
+plt.show()
+# Predicted values.
+
+y_pred_dt = dt_clf.predict(X_test)
+# Getting classification report.
+
+dict_2 = classification_report(y_test, y_pred_dt, output_dict = True)
+# Storing the scores in a dataframe
+tempodf=pd.DataFrame(dict_2).transpose()
+tempodf['Model'] = 'Decision Tree Classifier'
+res_df=res_df.append(tempodf[2:-2])
+res_df
+# Importing Necessary library
+
+from sklearn.ensemble import RandomForestClassifier
+#Creating an instance for the random forest regressor.
+
+rf_clf = RandomForestClassifier()
+# Storing the hyperparameters in Dict
+params = {'n_estimators' : [750, 850],
+         'max_depth': [7,9],
+         'max_features' : [7,8],
+         'min_samples_leaf' : [2,3]}
+# Using GridSearchCV for hyperparameter tuning
+cv = GridSearchCV(rf_clf, param_grid = params, scoring = 'roc_auc', cv =5)
+# Fitting the model
+cv.fit(X_train_sm, y_train_sm)
+# Checking the best parameters
+cv.best_estimator_
+# Getting the predicted classes for training and testing set
+
+train_rf_prediction = cv.predict(X_train_sm)
+test_rf_prediction = cv.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy_rf = accuracy_score(train_rf_prediction, y_train_sm)
+test_accuracy_rf = accuracy_score(test_rf_prediction, y_test)
+
+# Display accuracies.
+print("The accuracy on train data is ", train_accuracy_rf)
+print("The accuracy on test data is ", test_accuracy_rf)
+# Confusion Matrix for random forest classifier.
+
+rf_cf_matrix = confusion_matrix(y_test,test_rf_prediction)
+rf_cf_matrix
+# Plotting the confusion matrix
+
+labels = ['538','96','13','99']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(rf_cf_matrix, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for Random Forest');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+## Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True'])
+ax.yaxis.set_ticklabels(['False','True'])
+
+## Display the visualization of the Confusion Matrix.
+plt.show()
+# Predicted values.
+
+y_pred_rf = cv.predict(X_test)
+# Getting classification report.
+
+dict_3 = classification_report(y_test, y_pred_rf, output_dict = True)
+# Storing the scores in a dataframe
+tempodf=pd.DataFrame(dict_3).transpose()
+tempodf['Model'] = 'Random Forest Classifier'
+res_df=res_df.append(tempodf[2:-2])
+res_df
+# Importing Necessary library
+
+from sklearn.ensemble import RandomForestClassifier
+#Creating an instance for the random forest regressor.
+
+rf_clf = RandomForestClassifier()
+# Storing the hyperparameters in Dict
+params = {'n_estimators' : [750, 850],
+         'max_depth': [7,9],
+         'max_features' : [7,8],
+         'min_samples_leaf' : [2,3]}
+# Using GridSearchCV for hyperparameter tuning
+cv = GridSearchCV(rf_clf, param_grid = params, scoring = 'roc_auc', cv =5)
+# Fitting the model
+cv.fit(X_train_sm, y_train_sm)
+# Checking the best parameters
+cv.best_estimator_
+# Getting the predicted classes for training and testing set
+
+train_rf_prediction = cv.predict(X_train_sm)
+test_rf_prediction = cv.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy_rf = accuracy_score(train_rf_prediction, y_train_sm)
+test_accuracy_rf = accuracy_score(test_rf_prediction, y_test)
+
+# Display accuracies.
+print("The accuracy on train data is ", train_accuracy_rf)
+print("The accuracy on test data is ", test_accuracy_rf)
+# Confusion Matrix for random forest classifier.
+
+rf_cf_matrix = confusion_matrix(y_test,test_rf_prediction)
+rf_cf_matrix
+ Plotting the confusion matrix
+
+labels = ['538','96','13','99']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(rf_cf_matrix, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for Random Forest');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+## Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True'])
+ax.yaxis.set_ticklabels(['False','True'])
+
+## Display the visualization of the Confusion Matrix.
+plt.show()
+# Predicted values.
+
+y_pred_rf = cv.predict(X_test)
+# Getting classification report.
+
+dict_3 = classification_report(y_test, y_pred_rf, output_dict = True)
+# Storing the scores in a dataframe
+tempodf=pd.DataFrame(dict_3).transpose()
+tempodf['Model'] = 'Random Forest Classifier'
+res_df=res_df.append(tempodf[2:-2])
+res_df
+# Importing necessary library
+
+from sklearn.neighbors import KNeighborsClassifier
+#Creating an instance for the KNN classifier.
+
+KNN_clf = KNeighborsClassifier()
+# Using hyperparameter tuning to get the opimal value of n_neighbors
+
+parameters = {'n_neighbors':np.arange(1,10)}
+cv_knn = GridSearchCV(KNN_clf, cv = 5, param_grid = parameters)
+# Fitting the model
+
+cv_knn.fit(X_train_sm, y_train_sm)
+# Checking the best parameter.
+
+cv_knn.best_estimator_
+# Getting the predicted classes for training and testing set
+
+train_knn_prediction = cv_knn.predict(X_train_sm)
+test_knn_prediction = cv_knn.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy_knn = accuracy_score(train_knn_prediction, y_train_sm)
+test_accuracy_knn = accuracy_score(test_knn_prediction, y_test)
+
+# Display accuracies.
+
+print("The accuracy on train data is ", train_accuracy_knn)
+print("The accuracy on test data is ", test_accuracy_knn)
+# Confusion Matrix for KNN classifier.
+
+knn_cf_matrix = confusion_matrix(y_test,test_knn_prediction)
+knn_cf_matrix
+# Plotting the confusion matrix
+labels = ['634','0','1','111']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(knn_cf_matrix, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for KNN');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+## Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True']ax.yaxis.set_ticklabels(['False','True'])
+
+## Display the visualization of the Confusion Matrix.
+plt.show()
+                        # Predicted values.
+
+y_pred_gnb = gnb.predict(X_test)
+# Getting classification report.
+
+dict_5 = classification_report(y_test, y_pred_gnb, output_dict = True)
+# Storing the scores in a dataframe
+tempodf=pd.DataFrame(dict_5).transpose()
+tempodf['Model'] = 'Gaussian Naive Bayes Classifier'
+res_df=res_df.append(tempodf[2:-2])
+res_df
+# Importing XGBoost Classifier.
+from xgboost import XGBClassifier
+# Creating the hyperparameters in lists.
+n_estimators = [50,80,100]
+max_depth = [4,6,8]
+min_samples_split = [50,100,150]
+min_samples_leaf = [40,50]
+
+# storing the hyperparameters in Dict
+
+param_dict = {'n_estimators' : n_estimators,
+              'max_depth' : max_depth,
+              'min_samples_split' : min_samples_split,
+              'min_samples_leaf' : min_samples_leaf}
+# Create an instance of the XGBoost
+
+xgb_model = XGBClassifier(learning_rate=0.1)
+# Using GridSearchCV for hyperparameter tuning
+xgb_random = GridSearchCV(xgb_model, param_grid = param_dict, scoring = 'roc_auc',cv=5)
+#Fitting the model
+xgb_random.fit(X_train_sm, y_train_sm)
+# Checking the best parameter.
+
+xgb_random.best_estimator_
+# Getting the predicted classes for training and testing set
+
+train_xgb_prediction = xgb_random.predict(X_train_sm)
+test_xgb_prediction = xgb_random.predict(X_test)
+# Getting the accuracy scores for training and testing set.
+
+train_accuracy_xgb = accuracy_score(train_xgb_prediction, y_train_sm)
+test_accuracy_xgb = accuracy_score(test_xgb_prediction, y_test)
+
+# Display accuracies.
+
+print("The accuracy on train data is ", train_accuracy_xgb
+      print("The accuracy on test data is ", test_accuracy_xgb
+            # Confusion Matrix for logistic regression classifier.
+
+cf_matrix_xgb = confusion_matrix(y_test,test_xgb_prediction)
+cf_matrix_xgb
+      #Plotting the confusion matrix.
+labels = ['631','3','16','96']
+
+labels = np.asarray(labels).reshape(2,2)
+
+ax = sns.heatmap(cf_matrix_xgb, annot=labels, fmt='', cmap='Blues')
+
+ax.set_title('Confusion Matrix for XGB');
+ax.set_xlabel('Predicted Values')
+ax.set_ylabel('Actual Values');
+
+## Ticket labels - List must be in alphabetical order
+ax.xaxis.set_ticklabels(['False','True'])
+ax.yaxis.set_ticklabels(['False','True'])
+
+## Display the visualization of the Confusion Matrix.
+plt.show()
+  
