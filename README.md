@@ -125,3 +125,27 @@ Continuous monitoring (e.g., wearable ECGs) enables proactive care and timely in
 <img width="409" alt="image" src="https://github.com/user-attachments/assets/02509ad4-cb05-428f-8cf9-b9ca5a80c471" />
 
 <img width="853" alt="image" src="https://github.com/user-attachments/assets/b986edb4-9d90-4def-b1cd-e2256fb744e4" />
+
+<img width="459" alt="image" src="https://github.com/user-attachments/assets/732de6d1-f99a-43e1-96c6-0c5891d55283" />
+
+<img width="416" alt="image" src="https://github.com/user-attachments/assets/274c5295-6104-4cca-9652-183d0d2f84d8" />
+
+<img width="243" alt="image" src="https://github.com/user-attachments/assets/345b34c0-bafc-481c-afe2-79be3a38725c" />
+
+<img width="416" alt="image" src="https://github.com/user-attachments/assets/bb5f3ded-af81-437a-a719-3baa400f36b7" />
+
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/ee3b4f78-7471-42f6-b6c6-a3741a01aa2c" />
+
+<img width="299" alt="image" src="https://github.com/user-attachments/assets/75232eb7-1f1c-4212-ba0a-49a3c3d9eed1" />
+
+<img width="1233" alt="image" src="https://github.com/user-attachments/assets/403c5c30-ec28-489e-b875-569a78ae6770" />
+
+<img width="1237" alt="image" src="https://github.com/user-attachments/assets/07f02d6e-203d-4a2e-bf5f-f7dd6250f051" />
+
+<img width="601" alt="image" src="https://github.com/user-attachments/assets/5771964f-75f0-4a45-93c3-c5fffe7ddd12" />
+
+<img width="588" alt="image" src="https://github.com/user-attachments/assets/44dcfce9-0399-4d8a-aeca-5c1df9acb700" />
+
+<img width="486" alt="image" src="https://github.com/user-attachments/assets/b3d909bb-4a52-4410-901d-deb28fc6e7a6" />
+
+<img width="486" alt="image" src="https://github.com/user-attachments/assets/32bc2e4a-ee17-4654-a2b5-29ce4a555c33" />
